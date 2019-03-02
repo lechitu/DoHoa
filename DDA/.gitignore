@@ -1,1 +1,4 @@
-*.layout
+DDA.layout
+DDA.o
+DDA.exe
+Makefile.win
