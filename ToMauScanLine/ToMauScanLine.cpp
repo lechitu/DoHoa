@@ -1,100 +1,80 @@
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <conio.h>
 #include <graphics.h>
-#include <dos.h>
-#define MAXVERTEX 20
-#define MAXEDGE 20
-#define TRUE 1
-#define FALSE 0
+#include <stdlib.h>
 
-typedef struct{
-	int x;
-	int y;
-}POINT;
+using namespace std;
 
-typedef struct{
-	int NumVertex;
-	POINTaVertex[MAXVERTEX];
-}POLYGON;
-
-typedef struct{
-	int NumPt;
-	float xPt[MAXEDGE];
-}XINTERSECT;
-
-typedef struct{
-	int yMin;
-	float xIntersect;
-	float dxPerScan;
-	int DeltaY;
-}EDGE;
-
-typedef struct{
-	int NumEdge;
-	EDGE aEdge[MAXEDGE];
-}EDGELIST;
-
-void PutEdgeInList(EDGELIST &EdgeList, POINT p1, POINT p2, int NextY){
-	EDGE EdgeTmp;
-	EdgeTmp.dxPerScan = float(p2.x - p1.x)/(p2.y - p1.y);
-	if (p1.y < p2.y){
-		if (p2.y < NextY){
-			p2.y--;
-			p2.x -= EdgeTmp.dxPerScan;
-		}
-		EdgeTmp.yMin = p1.y;
-		EdgeTmp.xIntersect = p1.x;
-		EdgeTmp.DeltaY = abs(p2.y - p1.y) + 1;
+struct ToaDo{
+	int x, y;
+};
+void nhapDaGiac(ToaDo p[], int v){
+	int i;
+	for(i=0;i<v;i++){
+		cout<<"\nNhap toa do dinh "<<i+1<<": ";
+		cout<<"\n\tx["<<(i+1)<<"] = ";cin>>p[i].x;
+		cout<<"\n\ty["<<(i+1)<<"] = ";cin>>p[i].y;
 	}
-	else{
-		if (p2.y > NextY){
-			p2.y++;
-			p2.x += EdgeTmp.dxPerScan;
-		}
-		EdgeTmp.yMin = p2.y;
-		EdgeTmp.xIntersect = p2.x;
-		EdgeTmp.DeltaY = abs(p2.y - p1.y) + 1;
-	}
-	int j = EdgeList.NumEdge;
-	while((j > 0)&&(EdgeList.aEdge[j - 1].yMin > EdgeTmp.yMin)){
-		EdgeList.aEdge[j] = EdgeList.aEdge[j - 1];
-		j--;
-	}
-	EdgeList.NumEdge++;
-	EdgeList.aEdge[j] EdgeTmp;
+	p[i].x=p[0].x;
+	p[i].y=p[0].y;
 }
-int FindNextY(POLYGON P, int id){
-	int j = (id + 1) % P.NumVertex;
-	while ((j < P.NumVertex)&&(P.aVertex[id].y == P.aVertex[j].y)){
-		j++;
+void veDaGiac(ToaDo p[], int v){
+	for(int i=0;i<v;i++){
+		line(p[i].x, p[i].y, p[i+1].x, p[i+1].y);
 	}
-	if(j < P.NumVertex){
-		return(P.aVertex[j].y);
-	}
-	return 0;
 }
-void MakeSortedEdge(POLYGON P, EDGELIST &EdgeList, int &TopScan, int &BottomScan){
-	TopScan = BottomScan = P.aVertex[0].y;
-	EdgeList.NumEdge = 0;
-	for (int i = 0;i < P.NumVertex;i++){
-		if (P.aVertex[i].y != P.aVertex[i+1].y){
-			PutEdgeInList(EdgeList, , P.aVertex[i], P.aVertex[i+1], FindNextY(P, i + 1));
-		}
-		if (P.aVertex[i+1].y > TopScan){
-			TopScan = P.aVertex[i+1].y;	
-		}
+void scanLine(ToaDo p[], int v){
+	int xmin, xmax, ymin, ymax, c, mang[50];
+	xmin=xmax=p[0].x;
+	ymin=ymax=p[0].y;
+	for(int i=0;i<v;i++){
+		if(xmin>p[i].x) xmin=p[i].x;
+		if(xmax<p[i].x) xmax=p[i].x;
+		if(ymin>p[i].y) ymin=p[i].y;
+		if(ymax<p[i].y) ymax=p[i].y;
 	}
-	BottomScan = EdgeList.aEdge[0].yMin;
+	float y;
+	y=ymin+0.01;
+	while(y<=ymax){
+		int x, x1, x2, y1, y2, tg;
+		c=0;
+		for(int i=0;i<v;i++){
+			x1=p[i].x;
+			y1=p[i].y;
+			x2=p[i+1].x;
+			y2=p[i+1].y;
+			if(y2<y1){
+				tg=x1;x1=x2;x2=tg;
+				tg=y1;y1=y2;y2=tg;
+			}
+			if(y<=y2 && y>=y1){
+				if(y1==y2) x=x1;
+				else{
+					x=((y-y1)*(x2-x1))/(y2-y1);
+					x+=x1;
+				}
+				if(x<=xmax && x>=xmin) mang[c++]=x;
+			}
+		}
+		for(int i=0;i<c;i+=2){
+			delay(30);
+			line(mang[i], y, mang[i+1], y);
+		}
+		y++;
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
+int main(){
+	int c = BLUE;
+	int driver=0,mode;
+	initgraph(&driver,&mode,"");
+	int v;
+	do{
+		cout<<"nhap so dinh da giac: ";cin>>v;
+	}while(v<3);
+	ToaDo p[v];
+	nhapDaGiac(p, v);
+	veDaGiac(p, v);
+	setcolor(c);
+	scanLine(p, v);
+	getch();
+}
